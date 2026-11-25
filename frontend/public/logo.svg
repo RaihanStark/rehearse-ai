@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="16" fill="#171717" />
+  <!-- Geometric R -->
+  <path
+    d="M14 20h10.5c4.7 0 8.5 3.3 8.5 7.8 0 3.7-2.6 6.7-6.3 7.5L32.5 44h-5.3l-5.2-8.2H18.5V44H14V20zm4.5 4.2v7.4h5.7c2.4 0 4.2-1.5 4.2-3.7s-1.8-3.7-4.2-3.7h-5.7z"
+    fill="#FAFAFA"
+  />
+  <!-- Voice Soundwave Bars -->
+  <rect x="37" y="27" width="3" height="10" rx="1.5" fill="#FAFAFA" />
+  <rect x="42" y="21" width="3" height="22" rx="1.5" fill="#FAFAFA" />
+  <rect x="47" y="25" width="3" height="14" rx="1.5" fill="#FAFAFA" />
+  <!-- Live Speaker Emerald Dot -->
+  <circle cx="54.5" cy="32" r="2.75" fill="#10B981" />
+</svg>

@@ -386,11 +386,9 @@
   <aside class="flex w-60 shrink-0 flex-col border-r border-neutral-200 bg-[#fafaf9]">
     <!-- Brand -->
     <div class="flex h-14 items-center justify-between border-b border-neutral-200 px-4">
-      <div class="flex items-center gap-2">
-        <div class="flex h-7 w-7 items-center justify-center rounded-md bg-neutral-900 text-xs font-bold text-white">
-          R
-        </div>
-        <span class="text-sm font-semibold tracking-tight text-neutral-900">rehearse</span>
+      <div class="flex items-center gap-2.5">
+        <img src="/logo.svg" alt="Rehearse AI" class="h-7 w-7 rounded-md" />
+        <span class="text-sm font-semibold tracking-tight text-neutral-900">Rehearse AI</span>
       </div>
       <span class="text-[11px] font-medium text-neutral-400">v0.1</span>
     </div>
