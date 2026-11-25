@@ -19,6 +19,7 @@
   import ResumeView from './lib/components/ResumeView.svelte';
   import SettingsView, { type AppSettings } from './lib/components/SettingsView.svelte';
   import VoiceCallView from './lib/components/VoiceCallView.svelte';
+  import { Badge, Button, Input, Modal, Select, Tabs } from './lib/components/ui';
   import {
     INITIAL_APPLICATIONS,
     type MockApplication,
@@ -501,14 +502,10 @@
       </div>
 
       {#if activeNav === 'jobs'}
-        <button
-          type="button"
-          onclick={() => (showNewJobModal = true)}
-          class="inline-flex items-center gap-1.5 rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-neutral-800"
-        >
+        <Button variant="primary" size="sm" onclick={() => (showNewJobModal = true)}>
           <Plus class="h-3.5 w-3.5" />
           New Job Listing
-        </button>
+        </Button>
       {/if}
     </header>
 
@@ -585,11 +582,11 @@
       <div class="flex items-center gap-2">
         <div class="relative w-56 sm:w-64">
           <Search class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" />
-          <input
+          <Input
             bind:value={searchQuery}
             type="text"
             placeholder="Search roles, company, stack..."
-            class="w-full rounded-md border border-neutral-200 bg-white py-1 pl-8 pr-7 text-xs text-neutral-900 placeholder-neutral-400 outline-none transition focus:border-neutral-400"
+            class="py-1 pl-8 pr-7"
           />
           {#if searchQuery}
             <button
@@ -603,13 +600,7 @@
         </div>
 
         {#if selectedCategory !== 'All' || searchQuery}
-          <button
-            type="button"
-            onclick={resetFilters}
-            class="text-xs font-medium text-neutral-500 hover:text-neutral-900"
-          >
-            Reset
-          </button>
+          <Button variant="ghost" size="xs" onclick={resetFilters}>Reset</Button>
         {/if}
       </div>
     </div>
@@ -743,38 +734,23 @@
             </div>
 
             <div class="flex items-center gap-2">
-              <button
-                type="button"
-                onclick={() => handleApplyToJob(selectedJob)}
-                class="inline-flex items-center gap-1.5 rounded-md bg-neutral-900 px-4 py-2 text-xs font-medium text-white transition hover:bg-neutral-800"
-              >
+              <Button variant="primary" size="md" onclick={() => handleApplyToJob(selectedJob)}>
                 <PhoneCall class="h-3.5 w-3.5" />
                 {applications.some((a) => a.jobId === selectedJob.id) ? 'View Application' : 'Apply & Interview'}
-              </button>
+              </Button>
             </div>
           </div>
 
           <!-- Detail Tabs: Job Description | Company -->
-          <div class="mt-4 flex items-center gap-5 border-b border-neutral-200 text-xs font-medium">
-            <button
-              type="button"
-              onclick={() => (detailTab = 'job')}
-              class="-mb-px border-b-2 pb-2.5 transition {detailTab === 'job'
-                ? 'border-neutral-900 text-neutral-900'
-                : 'border-transparent text-neutral-500 hover:text-neutral-800'}"
-            >
-              Job Description
-            </button>
-            <button
-              type="button"
-              onclick={() => (detailTab = 'company')}
-              class="-mb-px border-b-2 pb-2.5 transition {detailTab === 'company'
-                ? 'border-neutral-900 text-neutral-900'
-                : 'border-transparent text-neutral-500 hover:text-neutral-800'}"
-            >
-              Company ({selectedJob.company})
-            </button>
-          </div>
+          <Tabs
+            class="mt-4"
+            items={[
+              { id: 'job', label: 'Job Description' },
+              { id: 'company', label: `Company (${selectedJob.company})` },
+            ]}
+            active={detailTab}
+            onChange={(id) => (detailTab = id as 'job' | 'company')}
+          />
 
           {#if detailTab === 'job'}
             <!-- Resume Fit -->
@@ -951,95 +927,61 @@
   {/if}
 
   <!-- New Job Listing Modal (CV-only generator) -->
-  {#if showNewJobModal}
-    <div
-      role="dialog"
-      aria-modal="true"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/40 p-4"
-    >
-      <form
-        onsubmit={handleGenerateJobs}
-        class="w-full max-w-md rounded-lg border border-neutral-200 bg-white p-5 shadow-xl"
-      >
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="text-sm font-semibold text-neutral-900">Generate Job Listings</h2>
-            <p class="text-xs text-neutral-500">
-              Generated from your saved resume (~80% match / ~20% stretch).
-            </p>
+  <Modal
+    open={showNewJobModal}
+    maxWidth="md"
+    title="Generate Job Listings"
+    description="Generated from your saved resume (~80% match / ~20% stretch)."
+    onClose={() => (showNewJobModal = false)}
+  >
+    <form onsubmit={handleGenerateJobs}>
+      <div class="space-y-4">
+        <div>
+          <div class="flex items-center justify-between text-xs font-medium text-neutral-700">
+            <span>How many jobs to generate</span>
+            <span class="font-mono text-neutral-900">{genCount}</span>
           </div>
-          <button
-            type="button"
-            onclick={() => (showNewJobModal = false)}
-            class="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
-          >
-            <X class="h-4 w-4" />
-          </button>
-        </div>
-
-        <div class="mt-4 space-y-4">
-          <div>
-            <div class="flex items-center justify-between text-xs font-medium text-neutral-700">
-              <span>How many jobs to generate</span>
-              <span class="font-mono text-neutral-900">{genCount}</span>
-            </div>
-            <div class="mt-2 grid grid-cols-4 gap-1.5">
-              {#each [3, 5, 8, 10] as n}
-                <button
-                  type="button"
-                  onclick={() => (genCount = n)}
-                  class="rounded-md border py-1.5 text-xs font-medium transition {genCount === n
-                    ? 'border-neutral-900 bg-neutral-900 text-white'
-                    : 'border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50'}"
-                >
-                  {n} jobs
-                </button>
-              {/each}
-            </div>
+          <div class="mt-2 grid grid-cols-4 gap-1.5">
+            {#each [3, 5, 8, 10] as n}
+              <Button
+                variant={genCount === n ? 'primary' : 'secondary'}
+                size="sm"
+                onclick={() => (genCount = n)}
+              >
+                {n} jobs
+              </Button>
+            {/each}
           </div>
-
-          <label class="block text-xs font-medium text-neutral-700">
-            Department
-            <select
-              bind:value={genCategory}
-              class="mt-1 w-full rounded-md border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-xs text-neutral-900 outline-none focus:border-neutral-400 focus:bg-white"
-            >
-              <option value="Mixed">Mixed (All)</option>
-              <option value="Backend">Backend</option>
-              <option value="Fullstack">Fullstack</option>
-              <option value="Platform">Platform</option>
-              <option value="AI Systems">AI Systems</option>
-            </select>
-          </label>
-
-          <label class="flex items-center gap-2 text-xs text-neutral-600">
-            <input
-              type="checkbox"
-              bind:checked={genReplaceFeed}
-              class="h-3.5 w-3.5 rounded border-neutral-300 accent-neutral-900"
-            />
-            Replace current job feed
-          </label>
         </div>
 
-        <div class="mt-5 flex justify-end gap-2">
-          <button
-            type="button"
-            onclick={() => (showNewJobModal = false)}
-            class="rounded-md border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            class="rounded-md bg-neutral-900 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-neutral-800"
-          >
-            Generate {genCount} {genCount === 1 ? 'Job' : 'Jobs'}
-          </button>
-        </div>
-      </form>
-    </div>
-  {/if}
+        <Select label="Department" bind:value={genCategory}>
+          <option value="Mixed">Mixed (All)</option>
+          <option value="Backend">Backend</option>
+          <option value="Fullstack">Fullstack</option>
+          <option value="Platform">Platform</option>
+          <option value="AI Systems">AI Systems</option>
+        </Select>
+
+        <label class="flex items-center gap-2 text-xs text-neutral-600">
+          <input
+            type="checkbox"
+            bind:checked={genReplaceFeed}
+            class="h-3.5 w-3.5 rounded border-neutral-300 accent-neutral-900"
+          />
+          Replace current job feed
+        </label>
+      </div>
+
+      <div class="mt-5 flex justify-end gap-2">
+        <Button variant="secondary" size="sm" onclick={() => (showNewJobModal = false)}>
+          Cancel
+        </Button>
+        <Button type="submit" variant="primary" size="sm">
+          Generate {genCount} {genCount === 1 ? 'Job' : 'Jobs'}
+        </Button>
+      </div>
+    </form>
+  </Modal>
 
 </div>
 {/if}

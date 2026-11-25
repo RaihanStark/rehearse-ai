@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { Check, FileText, Trash2, Upload } from 'lucide-svelte';
+  import { Badge, Button, Card, Tabs, Textarea } from './ui';
 
   interface Props {
     cvText: string;
@@ -39,30 +40,10 @@
   let wordCount = $derived(draft.trim() ? draft.trim().split(/\s+/).length : 0);
 
   const KNOWN_SKILLS = [
-    'Go',
-    'Python',
-    'FastAPI',
-    'TypeScript',
-    'JavaScript',
-    'Svelte',
-    'React',
-    'Next.js',
-    'Tailwind CSS',
-    'PostgreSQL',
-    'SQLite',
-    'MySQL',
-    'Redis',
-    'Docker',
-    'Kubernetes',
-    'Linux',
-    'gRPC',
-    'GraphQL',
-    'Kafka',
-    'Rust',
-    'C++',
-    'AWS',
-    'WebSockets',
-    'WebRTC',
+    'Go', 'Python', 'FastAPI', 'TypeScript', 'JavaScript', 'Svelte', 'React',
+    'Next.js', 'Tailwind CSS', 'PostgreSQL', 'SQLite', 'MySQL', 'Redis',
+    'Docker', 'Kubernetes', 'Linux', 'gRPC', 'GraphQL', 'Kafka', 'Rust',
+    'C++', 'AWS', 'WebSockets', 'WebRTC',
   ];
 
   let detectedSkills = $derived(
@@ -149,7 +130,7 @@
 </script>
 
 <div class="flex min-h-0 flex-1 flex-col overflow-hidden bg-[#fafaf9]">
-  <!-- Unified Subbar (h-11, #fafaf9) -->
+  <!-- Unified Subbar -->
   <div class="flex min-h-11 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-neutral-200 bg-[#fafaf9] px-6 py-2">
     <div class="flex items-center gap-3 text-xs text-neutral-500">
       <span>{wordCount} words</span>
@@ -160,22 +141,17 @@
     </div>
 
     <div class="flex items-center gap-2">
-      <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-neutral-200 bg-white px-3 py-1 text-xs font-medium text-neutral-700 transition hover:bg-neutral-50">
+      <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 transition hover:bg-neutral-50">
         <Upload class="h-3.5 w-3.5 text-neutral-500" />
         Upload PDF / MD / TXT
         <input type="file" accept=".pdf,.md,.txt" onchange={handleFileInput} hidden />
       </label>
 
       {#if activeTab === 'text'}
-        <button
-          type="button"
-          onclick={handleSave}
-          disabled={!isDirty}
-          class="inline-flex items-center gap-1.5 rounded-md bg-neutral-900 px-3 py-1 text-xs font-medium text-white transition hover:bg-neutral-800 disabled:opacity-40"
-        >
+        <Button variant="primary" size="sm" onclick={handleSave} disabled={!isDirty}>
           <Check class="h-3.5 w-3.5" />
           Save Changes
-        </button>
+        </Button>
       {/if}
     </div>
   </div>
@@ -183,7 +159,6 @@
   <!-- Main Content -->
   <div class="flex-1 overflow-y-auto px-6 py-6">
     <div class="mx-auto grid max-w-5xl grid-cols-1 items-start gap-5 lg:grid-cols-12">
-      <!-- Left: PDF Upload & Preview / Extracted Text -->
       <div class="space-y-4 lg:col-span-8">
         <!-- Attached File Card / Dropzone -->
         <div
@@ -218,14 +193,9 @@
                   Replace
                   <input type="file" accept=".pdf,.md,.txt" onchange={handleFileInput} hidden />
                 </label>
-                <button
-                  type="button"
-                  onclick={removeFile}
-                  aria-label="Remove file"
-                  class="rounded-md border border-neutral-200 p-1.5 text-neutral-400 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
-                >
+                <Button variant="danger-subtle" size="icon" onclick={removeFile} aria-label="Remove file">
                   <Trash2 class="h-3.5 w-3.5" />
-                </button>
+                </Button>
               </div>
             </div>
           {:else}
@@ -243,31 +213,19 @@
         </div>
 
         <!-- Tabs: PDF Preview | Extracted Text -->
-        <section class="rounded-lg border border-neutral-200 bg-white">
-          <div class="flex items-center justify-between border-b border-neutral-200 px-5 pt-3">
-            <div class="flex items-center gap-5 text-xs font-medium">
-              <button
-                type="button"
-                onclick={() => (activeTab = 'pdf')}
-                class="-mb-px border-b-2 pb-2.5 transition {activeTab === 'pdf'
-                  ? 'border-neutral-900 text-neutral-900'
-                  : 'border-transparent text-neutral-500 hover:text-neutral-800'}"
-              >
-                PDF Preview
-              </button>
-              <button
-                type="button"
-                onclick={() => (activeTab = 'text')}
-                class="-mb-px border-b-2 pb-2.5 transition {activeTab === 'text'
-                  ? 'border-neutral-900 text-neutral-900'
-                  : 'border-transparent text-neutral-500 hover:text-neutral-800'}"
-              >
-                Extracted Text
-              </button>
-            </div>
-
+        <Card padding="none">
+          <div class="flex items-center justify-between px-5 pt-3">
+            <Tabs
+              items={[
+                { id: 'pdf', label: 'PDF Preview' },
+                { id: 'text', label: 'Extracted Text' },
+              ]}
+              active={activeTab}
+              onChange={(id) => (activeTab = id as 'pdf' | 'text')}
+              class="flex-1"
+            />
             {#if activeTab === 'text'}
-              <span class="pb-2 text-[11px] {isDirty ? 'font-medium text-amber-600' : 'text-emerald-700'}">
+              <span class="border-b border-neutral-200 pb-2.5 pl-4 text-[11px] {isDirty ? 'font-medium text-amber-600' : 'text-emerald-700'}">
                 {isDirty ? 'Unsaved changes' : 'Saved'}
               </span>
             {/if}
@@ -282,7 +240,6 @@
                   class="h-[560px] w-full rounded-md border border-neutral-200 bg-neutral-50"
                 ></iframe>
               {:else}
-                <!-- Clean Paper Document Mock Preview -->
                 <div class="mx-auto max-w-xl rounded-md border border-neutral-200 bg-[#fcfcfb] p-7 shadow-xs">
                   <div class="border-b border-neutral-200 pb-4">
                     <div class="text-base font-bold tracking-tight text-neutral-900">
@@ -309,9 +266,7 @@
                       <div class="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
                         Core Technical Stack
                       </div>
-                      <p class="mt-1 text-neutral-600">
-                        {detectedSkills.join(' · ')}
-                      </p>
+                      <p class="mt-1 text-neutral-600">{detectedSkills.join(' · ')}</p>
                     </div>
                   </div>
 
@@ -321,32 +276,31 @@
                 </div>
               {/if}
             {:else}
-              <textarea
+              <Textarea
                 bind:value={draft}
-                rows="18"
+                mono
+                rows={18}
                 placeholder="Paste or edit the extracted text from your resume..."
-                class="w-full resize-y rounded-md border border-neutral-200 bg-neutral-50 p-4 font-mono text-xs leading-relaxed text-neutral-800 outline-none transition focus:border-neutral-400 focus:bg-white"
-              ></textarea>
+                class="resize-y p-4"
+              />
             {/if}
           </div>
-        </section>
+        </Card>
       </div>
 
       <!-- Right: Parsed Profile Summary -->
       <aside class="space-y-4 lg:col-span-4">
-        <section class="rounded-lg border border-neutral-200 bg-white p-5">
+        <Card>
           <div class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
             Profile Summary
           </div>
-          <div class="mt-2 text-sm font-semibold text-neutral-900">
-            {headline}
-          </div>
+          <div class="mt-2 text-sm font-semibold text-neutral-900">{headline}</div>
           <p class="mt-1.5 text-xs leading-relaxed text-neutral-500">
             Job listings and interview questions are generated from your resume (~80% matching your stack, ~20% unfamiliar stretch topics).
           </p>
-        </section>
+        </Card>
 
-        <section class="rounded-lg border border-neutral-200 bg-white p-5">
+        <Card>
           <div class="flex items-center justify-between">
             <h3 class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
               Detected Skills
@@ -361,13 +315,11 @@
           {:else}
             <div class="mt-3 flex flex-wrap gap-1.5">
               {#each detectedSkills as skill}
-                <span class="rounded bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-700">
-                  {skill}
-                </span>
+                <Badge size="sm">{skill}</Badge>
               {/each}
             </div>
           {/if}
-        </section>
+        </Card>
       </aside>
     </div>
   </div>

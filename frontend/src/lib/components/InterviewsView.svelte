@@ -14,6 +14,7 @@
   } from 'lucide-svelte';
   import type { MockApplication } from '../mockInterviews';
   import type { MockJob } from '../mockJobs';
+  import { Badge, Button, Card, Tabs, Textarea } from './ui';
 
   interface Props {
     applications: MockApplication[];
@@ -156,53 +157,27 @@
           </div>
 
           {#if round.status === 'current'}
-            <button
-              type="button"
-              onclick={() => onStartStage(selected, rIdx)}
-              class="inline-flex items-center gap-1.5 rounded-md bg-neutral-900 px-4 py-2 text-xs font-medium text-white transition hover:bg-neutral-800"
-            >
+            <Button variant="primary" size="md" onclick={() => onStartStage(selected, rIdx)}>
               <PhoneCall class="h-3.5 w-3.5" />
               Join Round
-            </button>
+            </Button>
           {:else if round.status === 'upcoming'}
-            <span class="rounded-md border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-medium text-neutral-400">
-              Locked
-            </span>
+            <Badge variant="outline" size="sm" class="text-neutral-400">Locked</Badge>
           {/if}
         </div>
 
         {#if round.review}
           {@const rev = round.review}
           <!-- Round Tabs: Feedback | Transcript | Session Logs -->
-          <div class="flex items-center gap-6 border-b border-neutral-200 text-xs font-medium">
-            <button
-              type="button"
-              onclick={() => (roundTab = 'feedback')}
-              class="-mb-px border-b-2 pb-2.5 transition {roundTab === 'feedback'
-                ? 'border-neutral-900 text-neutral-900'
-                : 'border-transparent text-neutral-500 hover:text-neutral-800'}"
-            >
-              Feedback & Rewrites
-            </button>
-            <button
-              type="button"
-              onclick={() => (roundTab = 'transcript')}
-              class="-mb-px border-b-2 pb-2.5 transition {roundTab === 'transcript'
-                ? 'border-neutral-900 text-neutral-900'
-                : 'border-transparent text-neutral-500 hover:text-neutral-800'}"
-            >
-              Transcript ({rev.transcript.length})
-            </button>
-            <button
-              type="button"
-              onclick={() => (roundTab = 'logs')}
-              class="-mb-px border-b-2 pb-2.5 transition {roundTab === 'logs'
-                ? 'border-neutral-900 text-neutral-900'
-                : 'border-transparent text-neutral-500 hover:text-neutral-800'}"
-            >
-              Session Logs ({rev.logs.length})
-            </button>
-          </div>
+          <Tabs
+            items={[
+              { id: 'feedback', label: 'Feedback & Rewrites' },
+              { id: 'transcript', label: `Transcript (${rev.transcript.length})` },
+              { id: 'logs', label: `Session Logs (${rev.logs.length})` },
+            ]}
+            active={roundTab}
+            onChange={(id) => (roundTab = id as 'feedback' | 'transcript' | 'logs')}
+          />
 
           {#if roundTab === 'feedback'}
             <div class="space-y-5">
@@ -340,17 +315,17 @@
 
       {#if !isClosed(selected)}
         <div class="flex items-center gap-2">
-          <button
-            type="button"
+          <Button
+            variant="danger-subtle"
+            size="xs"
             onclick={() => {
               onDetailOpenChange(false);
               onWithdraw(selected.id);
             }}
-            class="inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-xs font-medium text-neutral-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
           >
             <Trash2 class="h-3.5 w-3.5" />
             Withdraw
-          </button>
+          </Button>
         </div>
       {/if}
     </div>
@@ -393,22 +368,18 @@
           </div>
 
           {#if !isClosed(selected)}
-            <button
-              type="button"
-              onclick={() => onStartStage(selected, activeIdx)}
-              class="inline-flex items-center gap-1.5 rounded-md bg-neutral-900 px-4 py-2 text-xs font-medium text-white transition hover:bg-neutral-800"
-            >
+            <Button variant="primary" size="md" onclick={() => onStartStage(selected, activeIdx)}>
               <PhoneCall class="h-3.5 w-3.5" />
               Join Round {activeIdx + 1}
-            </button>
+            </Button>
           {:else if selected.status === 'offer'}
-            <span class="rounded-md bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+            <Badge variant="success" size="sm" class="font-semibold">
               {selected.verdict || 'Offer Extended'} · {selected.overallScore}/100
-            </span>
+            </Badge>
           {:else}
-            <span class="rounded-md bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700">
+            <Badge variant="danger" size="sm" class="font-semibold">
               {selected.verdict || 'Rejected'}
-            </span>
+            </Badge>
           {/if}
         </div>
 
@@ -520,20 +491,12 @@
               <!-- Accept / Decline Actions -->
               {#if !offer.decision}
                 <div class="mt-6 flex items-center justify-end gap-2 border-t border-neutral-200 pt-5">
-                  <button
-                    type="button"
-                    onclick={() => onRespondOffer(selected.id, 'declined')}
-                    class="rounded-md border border-neutral-200 bg-white px-4 py-2 text-xs font-medium text-neutral-600 transition hover:bg-neutral-50"
-                  >
+                  <Button variant="secondary" size="md" onclick={() => onRespondOffer(selected.id, 'declined')}>
                     Decline Offer
-                  </button>
-                  <button
-                    type="button"
-                    onclick={() => onRespondOffer(selected.id, 'accepted')}
-                    class="rounded-md bg-neutral-900 px-4 py-2 text-xs font-medium text-white transition hover:bg-neutral-800"
-                  >
+                  </Button>
+                  <Button variant="primary" size="md" onclick={() => onRespondOffer(selected.id, 'accepted')}>
                     Accept Offer
-                  </button>
+                  </Button>
                 </div>
               {/if}
             </section>
@@ -743,18 +706,15 @@
               </section>
             {/if}
 
-            <section class="rounded-lg border border-neutral-200 bg-white p-5">
-              <label class="block text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                Preparation Notes
-                <textarea
-                  value={selected.prepNotes}
-                  oninput={(e) => onUpdateNotes(selected.id, (e.currentTarget as HTMLTextAreaElement).value)}
-                  rows="8"
-                  placeholder="Notes from the company page, stories to mention, questions to ask..."
-                  class="mt-2.5 w-full rounded-md border border-neutral-200 bg-neutral-50 p-3 text-xs font-normal normal-case tracking-normal leading-relaxed text-neutral-800 outline-none focus:border-neutral-400 focus:bg-white"
-                ></textarea>
-              </label>
-            </section>
+            <Card>
+              <Textarea
+                label="Preparation Notes"
+                value={selected.prepNotes}
+                oninput={(e) => onUpdateNotes(selected.id, (e.currentTarget as HTMLTextAreaElement).value)}
+                rows={8}
+                placeholder="Notes from the company page, stories to mention, questions to ask..."
+              />
+            </Card>
           </div>
         </div>
         {:else if detailTab === 'jd' && selectedJob}
@@ -1023,27 +983,27 @@
                   <td class="px-4 py-3.5 text-neutral-500">{app.lastActivity}</td>
                   <td class="px-4 py-3.5 text-right">
                     {#if !isClosed(app)}
-                      <button
-                        type="button"
+                      <Button
+                        variant="primary"
+                        size="xs"
                         onclick={(e) => {
                           e.stopPropagation();
                           onStartStage(app, idx);
                         }}
-                        class="rounded bg-neutral-900 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-neutral-800"
                       >
                         Join Round {idx + 1}
-                      </button>
+                      </Button>
                     {:else}
-                      <button
-                        type="button"
+                      <Button
+                        variant="secondary"
+                        size="xs"
                         onclick={(e) => {
                           e.stopPropagation();
                           openDetail(app.id);
                         }}
-                        class="rounded border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-medium text-neutral-700 hover:bg-neutral-50"
                       >
                         Review
-                      </button>
+                      </Button>
                     {/if}
                   </td>
                 </tr>

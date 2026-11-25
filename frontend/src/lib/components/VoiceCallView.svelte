@@ -18,6 +18,7 @@
   } from 'lucide-svelte';
   import type { MockApplication, StageOutcome, TranscriptEntry } from '../mockInterviews';
   import type { MockJob } from '../mockJobs';
+  import { Button, Input, Modal, Select, Textarea } from './ui';
 
   interface Props {
     application: MockApplication;
@@ -168,24 +169,18 @@
           </div>
 
           <div class="space-y-3 border-t border-neutral-100 pt-4">
-            <label class="block text-[11px] font-medium text-neutral-500">
-              Microphone
-              <select
-                bind:value={selectedMic}
-                class="mt-1 w-full rounded-md border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-xs text-neutral-800 outline-none focus:border-neutral-400 focus:bg-white"
-              >
-                <option>Default — Built-in Microphone</option>
-                <option>Headset Microphone (Bluetooth)</option>
-                <option>USB Condenser Mic</option>
-              </select>
-            </label>
+            <Select label="Microphone" bind:value={selectedMic}>
+              <option>Default — Built-in Microphone</option>
+              <option>Headset Microphone (Bluetooth)</option>
+              <option>USB Condenser Mic</option>
+            </Select>
 
-            <button
-              type="button"
+            <Button
+              variant={muted ? 'danger-subtle' : 'secondary'}
+              size="md"
+              fullWidth
               onclick={() => (muted = !muted)}
-              class="inline-flex w-full items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition {muted
-                ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
-                : 'border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50'}"
+              class={muted ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100' : ''}
             >
               {#if muted}
                 <MicOff class="h-3.5 w-3.5" />
@@ -194,7 +189,7 @@
                 <Mic class="h-3.5 w-3.5" />
                 Mute Microphone
               {/if}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -236,21 +231,13 @@
           </div>
 
           <div class="mt-6 flex items-center gap-2">
-            <button
-              type="button"
-              onclick={onCancelLobby}
-              class="rounded-md border border-neutral-200 px-3.5 py-2.5 text-xs font-medium text-neutral-700 transition hover:bg-neutral-50"
-            >
+            <Button variant="secondary" size="md" onclick={onCancelLobby}>
               Cancel
-            </button>
-            <button
-              type="button"
-              onclick={enterLiveCall}
-              class="inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-neutral-900 px-4 py-2.5 text-xs font-medium text-white transition hover:bg-neutral-800"
-            >
+            </Button>
+            <Button variant="primary" size="md" onclick={enterLiveCall} class="flex-1">
               <PhoneCall class="h-3.5 w-3.5" />
               Join Call Now
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -481,28 +468,24 @@
             onsubmit={handleSendMockTurn}
             class="flex items-center gap-2 border-t border-neutral-200 p-3"
           >
-            <input
+            <Input
               bind:value={draftMessage}
               type="text"
               placeholder="Type a mock reply to test..."
-              class="w-full rounded-md border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs text-neutral-900 placeholder-neutral-400 outline-none focus:border-neutral-400 focus:bg-white"
+              class="bg-neutral-50 focus:bg-white"
             />
-            <button
-              type="submit"
-              disabled={!draftMessage.trim()}
-              class="rounded-md bg-neutral-900 p-1.5 text-white transition hover:bg-neutral-800 disabled:opacity-40"
-            >
+            <Button type="submit" variant="primary" size="icon" disabled={!draftMessage.trim()}>
               <Send class="h-3.5 w-3.5" />
-            </button>
+            </Button>
           </form>
         {:else if sidePanel === 'notes'}
           <div class="flex flex-1 flex-col p-4">
-            <textarea
+            <Textarea
               value={application.prepNotes}
               oninput={(e) => onUpdateNotes((e.currentTarget as HTMLTextAreaElement).value)}
               placeholder="Jot notes or reference points during the call..."
-              class="h-full w-full flex-1 resize-none rounded-md border border-neutral-200 bg-neutral-50 p-3 text-xs leading-relaxed text-neutral-800 outline-none focus:border-neutral-400 focus:bg-white"
-            ></textarea>
+              class="h-full flex-1 resize-none"
+            />
           </div>
         {:else if sidePanel === 'job' && job}
           <div class="flex-1 space-y-4 overflow-y-auto p-4 text-xs leading-relaxed text-neutral-700">
@@ -535,12 +518,11 @@
 
   <!-- Bottom Call Controls -->
   <footer class="flex h-18 shrink-0 items-center justify-center gap-3 border-t border-neutral-200 bg-white px-6">
-    <button
-      type="button"
+    <Button
+      variant={muted ? 'danger-subtle' : 'secondary'}
+      pill
       onclick={() => (muted = !muted)}
-      class="inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-medium transition {muted
-        ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
-        : 'border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50'}"
+      class="py-2.5 {muted ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100' : ''}"
     >
       {#if muted}
         <MicOff class="h-4 w-4" />
@@ -549,161 +531,139 @@
         <Mic class="h-4 w-4" />
         Mute
       {/if}
-    </button>
+    </Button>
 
-    <button
-      type="button"
+    <Button
+      variant={sidePanel === 'transcript' ? 'primary' : 'secondary'}
+      pill
       onclick={() => togglePanel('transcript')}
-      class="inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-medium transition {sidePanel === 'transcript'
-        ? 'border-neutral-900 bg-neutral-900 text-white'
-        : 'border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50'}"
+      class="py-2.5"
     >
       <Captions class="h-4 w-4" />
       Captions
-    </button>
+    </Button>
 
-    <button
-      type="button"
+    <Button
+      variant={sidePanel === 'notes' ? 'primary' : 'secondary'}
+      pill
       onclick={() => togglePanel('notes')}
-      class="inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-medium transition {sidePanel === 'notes'
-        ? 'border-neutral-900 bg-neutral-900 text-white'
-        : 'border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50'}"
+      class="py-2.5"
     >
       <FileText class="h-4 w-4" />
       Notes
-    </button>
+    </Button>
 
-    <button
-      type="button"
+    <Button
+      variant="danger"
+      pill
       onclick={() => (showEndConfirm = true)}
-      class="ml-2 inline-flex items-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-xs font-medium text-white transition hover:bg-red-700"
+      class="ml-2 px-5 py-2.5"
     >
       <PhoneOff class="h-4 w-4" />
       End Call
-    </button>
+    </Button>
   </footer>
 
   <!-- End Call Confirmation Modal -->
-  {#if showEndConfirm}
-    <div
-      role="dialog"
-      aria-modal="true"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/40 p-4"
-    >
-      <div class="w-full max-w-sm rounded-lg border border-neutral-200 bg-white p-5 shadow-xl">
-        <h2 class="text-sm font-semibold text-neutral-900">End Round {stageIndex + 1}?</h2>
-        <p class="mt-1.5 text-xs leading-relaxed text-neutral-500">
-          Ending this call submits the round for evaluation. Completed rounds cannot be retaken.
-        </p>
-
-        <!-- UI Mock Outcome Selector -->
-        <div class="mt-4 rounded-md border border-neutral-200 bg-neutral-50 p-3">
-          <div class="text-[11px] font-medium text-neutral-500">Preview outcome (UI mock)</div>
-          <div class="mt-2 grid grid-cols-2 gap-1.5 text-xs">
-            <button
-              type="button"
-              onclick={() => (mockOutcome = 'passed')}
-              class="rounded border py-1.5 font-medium transition {mockOutcome === 'passed'
-                ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
-                : 'border-neutral-200 bg-white text-neutral-600'}"
-            >
-              Pass Round
-            </button>
-            <button
-              type="button"
-              onclick={() => (mockOutcome = 'rejected')}
-              class="rounded border py-1.5 font-medium transition {mockOutcome === 'rejected'
-                ? 'border-red-600 bg-red-50 text-red-700'
-                : 'border-neutral-200 bg-white text-neutral-600'}"
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-
-        <div class="mt-5 flex justify-end gap-2">
-          <button
-            type="button"
-            onclick={() => (showEndConfirm = false)}
-            class="rounded-md border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
-          >
-            Stay in Call
-          </button>
-          <button
-            type="button"
-            onclick={confirmEndCall}
-            class="rounded-md bg-red-600 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-red-700"
-          >
-            End & Submit Round
-          </button>
-        </div>
-      </div>
-    </div>
-  {/if}
-
-  <!-- Round Completed Outcome Modal -->
-  {#if showFinishedModal}
-    {@const nextStage = application.stages[stageIndex + 1]}
-    <div
-      role="dialog"
-      aria-modal="true"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/40 p-4"
-    >
-      <div class="w-full max-w-sm rounded-lg border border-neutral-200 bg-white p-6 text-center shadow-xl">
-        {#if mockOutcome === 'passed'}
-          <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-            <CheckCircle2 class="h-6 w-6" />
-          </div>
-          <h2 class="mt-3.5 text-base font-semibold text-neutral-900">
-            Round {stageIndex + 1} Passed
-          </h2>
-        {:else}
-          <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-red-50 text-red-600">
-            <XCircle class="h-6 w-6" />
-          </div>
-          <h2 class="mt-3.5 text-base font-semibold text-neutral-900">
-            Did Not Advance
-          </h2>
-        {/if}
-
-        <p class="mt-1 text-xs text-neutral-500">
-          {application.company} · {stage.name}
-        </p>
-
-        <div class="mt-4 grid grid-cols-2 gap-2 rounded-md border border-neutral-200 bg-neutral-50 p-3 text-xs">
-          <div>
-            <div class="text-neutral-400">Duration</div>
-            <div class="mt-0.5 font-mono font-semibold text-neutral-900">
-              {formatTime(finalDurationSec)}
-            </div>
-          </div>
-          <div>
-            <div class="text-neutral-400">Score</div>
-            <div class="mt-0.5 font-mono font-semibold {mockOutcome === 'passed' ? 'text-emerald-700' : 'text-red-700'}">
-              {mockOutcome === 'passed' ? '84/100' : '56/100'}
-            </div>
-          </div>
-        </div>
-
-        <p class="mt-3.5 text-xs leading-relaxed text-neutral-500">
-          {#if mockOutcome === 'rejected'}
-            Your application with {application.company} has closed at Round {stageIndex + 1}. Review the transcript and feedback to see what to improve.
-          {:else if nextStage}
-            Your transcript and feedback are saved. <strong class="font-medium text-neutral-800">Round {stageIndex + 2} ({nextStage.name})</strong> is now unlocked.
-          {:else}
-            You passed all hiring rounds! Your final offer summary and full feedback are ready.
-          {/if}
-        </p>
-
+  <Modal
+    open={showEndConfirm}
+    maxWidth="sm"
+    title={`End Round ${stageIndex + 1}?`}
+    description="Ending this call submits the round for evaluation. Completed rounds cannot be retaken."
+  >
+    <div class="rounded-md border border-neutral-200 bg-neutral-50 p-3">
+      <div class="text-[11px] font-medium text-neutral-500">Preview outcome (UI mock)</div>
+      <div class="mt-2 grid grid-cols-2 gap-1.5 text-xs">
         <button
           type="button"
-          onclick={() => onFinishCall(transcript, finalDurationSec, mockOutcome)}
-          class="mt-5 w-full rounded-md bg-neutral-900 px-4 py-2 text-xs font-medium text-white transition hover:bg-neutral-800"
+          onclick={() => (mockOutcome = 'passed')}
+          class="rounded border py-1.5 font-medium transition {mockOutcome === 'passed'
+            ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+            : 'border-neutral-200 bg-white text-neutral-600'}"
         >
-          Back to Interviews
+          Pass Round
+        </button>
+        <button
+          type="button"
+          onclick={() => (mockOutcome = 'rejected')}
+          class="rounded border py-1.5 font-medium transition {mockOutcome === 'rejected'
+            ? 'border-red-600 bg-red-50 text-red-700'
+            : 'border-neutral-200 bg-white text-neutral-600'}"
+        >
+          Reject
         </button>
       </div>
     </div>
-  {/if}
+
+    <div class="mt-5 flex justify-end gap-2">
+      <Button variant="secondary" size="sm" onclick={() => (showEndConfirm = false)}>
+        Stay in Call
+      </Button>
+      <Button variant="danger" size="sm" onclick={confirmEndCall}>
+        End & Submit Round
+      </Button>
+    </div>
+  </Modal>
+
+  <!-- Round Completed Outcome Modal -->
+  <Modal open={showFinishedModal} maxWidth="sm">
+    {@const nextStage = application.stages[stageIndex + 1]}
+    <div class="text-center">
+      {#if mockOutcome === 'passed'}
+        <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+          <CheckCircle2 class="h-6 w-6" />
+        </div>
+        <h2 class="mt-3.5 text-base font-semibold text-neutral-900">
+          Round {stageIndex + 1} Passed
+        </h2>
+      {:else}
+        <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-red-50 text-red-600">
+          <XCircle class="h-6 w-6" />
+        </div>
+        <h2 class="mt-3.5 text-base font-semibold text-neutral-900">
+          Did Not Advance
+        </h2>
+      {/if}
+
+      <p class="mt-1 text-xs text-neutral-500">
+        {application.company} · {stage.name}
+      </p>
+
+      <div class="mt-4 grid grid-cols-2 gap-2 rounded-md border border-neutral-200 bg-neutral-50 p-3 text-xs">
+        <div>
+          <div class="text-neutral-400">Duration</div>
+          <div class="mt-0.5 font-mono font-semibold text-neutral-900">
+            {formatTime(finalDurationSec)}
+          </div>
+        </div>
+        <div>
+          <div class="text-neutral-400">Score</div>
+          <div class="mt-0.5 font-mono font-semibold {mockOutcome === 'passed' ? 'text-emerald-700' : 'text-red-700'}">
+            {mockOutcome === 'passed' ? '84/100' : '56/100'}
+          </div>
+        </div>
+      </div>
+
+      <p class="mt-3.5 text-xs leading-relaxed text-neutral-500">
+        {#if mockOutcome === 'rejected'}
+          Your application with {application.company} has closed at Round {stageIndex + 1}. Review the transcript and feedback to see what to improve.
+        {:else if nextStage}
+          Your transcript and feedback are saved. <strong class="font-medium text-neutral-800">Round {stageIndex + 2} ({nextStage.name})</strong> is now unlocked.
+        {:else}
+          You passed all hiring rounds! Your final offer summary and full feedback are ready.
+        {/if}
+      </p>
+
+      <Button
+        variant="primary"
+        size="md"
+        fullWidth
+        onclick={() => onFinishCall(transcript, finalDurationSec, mockOutcome)}
+        class="mt-5"
+      >
+        Back to Interviews
+      </Button>
+    </div>
+  </Modal>
 </div>
 {/if}

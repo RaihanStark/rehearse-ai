@@ -2,6 +2,7 @@
   import { ArrowRight, CheckCircle2, PhoneCall, XCircle } from 'lucide-svelte';
   import type { MockApplication } from '../mockInterviews';
   import type { MockJob } from '../mockJobs';
+  import { Badge, Button, Card } from './ui';
 
   interface Props {
     applications: MockApplication[];
@@ -84,7 +85,7 @@
 </script>
 
 <div class="flex min-h-0 flex-1 flex-col overflow-hidden bg-[#fafaf9]">
-  <!-- Unified Subbar (h-11, #fafaf9) -->
+  <!-- Unified Subbar -->
   <div class="flex min-h-11 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-neutral-200 bg-[#fafaf9] px-6 py-2">
     <div class="flex flex-wrap items-center gap-3 text-xs text-neutral-500">
       <span>{activeApps.length} ongoing</span>
@@ -103,38 +104,36 @@
     <div class="mx-auto max-w-5xl space-y-5">
       <!-- Top 4 Metrics -->
       <div class="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
-        <div class="rounded-lg border border-neutral-200 bg-white p-4">
+        <Card padding="sm">
           <div class="text-xs text-neutral-500">Ongoing Interviews</div>
           <div class="mt-1.5 text-2xl font-semibold tracking-tight text-neutral-900">
             {activeApps.length}
           </div>
-        </div>
-        <div class="rounded-lg border border-neutral-200 bg-white p-4">
+        </Card>
+        <Card padding="sm">
           <div class="text-xs text-neutral-500">Rounds Completed</div>
           <div class="mt-1.5 text-2xl font-semibold tracking-tight text-neutral-900">
             {completedRoundsCount}
           </div>
-        </div>
-        <div class="rounded-lg border border-neutral-200 bg-white p-4">
+        </Card>
+        <Card padding="sm">
           <div class="text-xs text-neutral-500">Offers Extended</div>
           <div class="mt-1.5 text-2xl font-semibold tracking-tight text-emerald-700">
             {offerCount}
           </div>
-        </div>
-        <div class="rounded-lg border border-neutral-200 bg-white p-4">
+        </Card>
+        <Card padding="sm">
           <div class="text-xs text-neutral-500">Average Round Score</div>
           <div class="mt-1.5 text-2xl font-semibold tracking-tight text-neutral-900">
             {avgScore() !== null ? `${avgScore()}/100` : '—'}
           </div>
-        </div>
+        </Card>
       </div>
 
       <!-- Main 2-Column Grid -->
       <div class="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
-        <!-- Left Column: Active Interviews & Recent Rounds -->
         <div class="space-y-5 lg:col-span-7">
-          <!-- Active Interviews -->
-          <section class="rounded-lg border border-neutral-200 bg-white">
+          <Card padding="none">
             <div class="flex items-center justify-between border-b border-neutral-100 px-5 py-3.5">
               <h2 class="text-xs font-semibold uppercase tracking-wide text-neutral-500">
                 Active Interviews
@@ -190,22 +189,17 @@
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onclick={() => onStartStage(app, idx)}
-                      class="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-neutral-800"
-                    >
+                    <Button variant="primary" size="sm" onclick={() => onStartStage(app, idx)}>
                       <PhoneCall class="h-3.5 w-3.5" />
                       Join Round {idx + 1}
-                    </button>
+                    </Button>
                   </div>
                 {/each}
               </div>
             {/if}
-          </section>
+          </Card>
 
-          <!-- Recent Completed Rounds -->
-          <section class="rounded-lg border border-neutral-200 bg-white">
+          <Card padding="none">
             <div class="flex items-center justify-between border-b border-neutral-100 px-5 py-3.5">
               <h2 class="text-xs font-semibold uppercase tracking-wide text-neutral-500">
                 Recent Rounds
@@ -224,7 +218,7 @@
                     onclick={() => onOpenApplication(app.id)}
                     class="flex w-full items-center justify-between gap-3 px-5 py-3 text-left text-xs transition hover:bg-neutral-50"
                   >
-                    <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="flex min-w-0 items-center gap-2.5">
                       {#if st.outcome === 'rejected'}
                         <XCircle class="h-4 w-4 shrink-0 text-red-600" />
                       {:else}
@@ -241,25 +235,22 @@
                     </div>
 
                     {#if st.score !== undefined}
-                      <span
-                        class="shrink-0 rounded px-2 py-0.5 font-mono font-semibold {st.outcome === 'rejected'
-                          ? 'bg-red-50 text-red-700'
-                          : 'bg-emerald-50 text-emerald-700'}"
+                      <Badge
+                        variant={st.outcome === 'rejected' ? 'danger' : 'success'}
+                        class="shrink-0 font-mono font-semibold"
                       >
                         {st.score}/100
-                      </span>
+                      </Badge>
                     {/if}
                   </button>
                 {/each}
               </div>
             {/if}
-          </section>
+          </Card>
         </div>
 
-        <!-- Right Column: Recommended Roles & Practice Focus -->
         <div class="space-y-5 lg:col-span-5">
-          <!-- Recommended Roles -->
-          <section class="rounded-lg border border-neutral-200 bg-white">
+          <Card padding="none">
             <div class="flex items-center justify-between border-b border-neutral-100 px-5 py-3.5">
               <h2 class="text-xs font-semibold uppercase tracking-wide text-neutral-500">
                 Open Roles to Apply
@@ -286,7 +277,7 @@
                     onclick={() => onOpenJob(job.id)}
                     class="flex w-full items-start justify-between gap-3 px-5 py-3.5 text-left transition hover:bg-neutral-50"
                   >
-                    <div class="flex items-start gap-2.5 min-w-0">
+                    <div class="flex min-w-0 items-start gap-2.5">
                       <div
                         class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[11px] font-semibold {job.accent}"
                       >
@@ -308,10 +299,9 @@
                 {/each}
               </div>
             {/if}
-          </section>
+          </Card>
 
-          <!-- Practice Focus / Recurring Feedback -->
-          <section class="rounded-lg border border-neutral-200 bg-white p-5">
+          <Card>
             <h2 class="text-xs font-semibold uppercase tracking-wide text-neutral-500">
               Areas to Sharpen
             </h2>
@@ -326,7 +316,7 @@
                 {/each}
               </ul>
             {/if}
-          </section>
+          </Card>
         </div>
       </div>
     </div>
