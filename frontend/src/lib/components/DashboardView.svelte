@@ -157,18 +157,18 @@
                 {#each activeApps as app}
                   {@const idx = currentStageIndex(app)}
                   {@const stage = app.stages[idx]}
-                  <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-                    <div class="flex min-w-0 items-start gap-3">
+                  <div class="flex items-center justify-between gap-4 px-5 py-4">
+                    <div class="flex min-w-0 flex-1 items-start gap-3">
                       <div
                         class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-xs font-semibold {app.accent}"
                       >
                         {app.initials}
                       </div>
-                      <div class="min-w-0">
+                      <div class="min-w-0 flex-1">
                         <button
                           type="button"
                           onclick={() => onOpenApplication(app.id)}
-                          class="text-left text-sm font-semibold text-neutral-900 hover:underline"
+                          class="block truncate text-left text-sm font-semibold text-neutral-900 hover:underline"
                         >
                           {app.company} — {stage.name}
                         </button>
@@ -189,7 +189,12 @@
                       </div>
                     </div>
 
-                    <Button variant="primary" size="sm" onclick={() => onStartStage(app, idx)}>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onclick={() => onStartStage(app, idx)}
+                      class="shrink-0 whitespace-nowrap"
+                    >
                       <PhoneCall class="h-3.5 w-3.5" />
                       Join Round {idx + 1}
                     </Button>

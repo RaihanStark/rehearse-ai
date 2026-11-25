@@ -334,18 +334,18 @@
     <div class="flex-1 overflow-y-auto px-6 py-6">
       <div class="mx-auto max-w-5xl space-y-5">
         <!-- Application Header Card -->
-        <div class="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-neutral-200 bg-white p-5">
-          <div class="flex items-start gap-3.5">
+        <div class="flex items-center justify-between gap-4 rounded-lg border border-neutral-200 bg-white p-5">
+          <div class="flex min-w-0 flex-1 items-start gap-3.5">
             <div
               class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-sm font-semibold {selected.accent}"
             >
               {selected.initials}
             </div>
-            <div>
+            <div class="min-w-0 flex-1">
               <div class="text-xs font-medium text-neutral-500">
                 {selected.company} · {selected.location} · Applied {selected.appliedAgo}
               </div>
-              <h2 class="mt-0.5 text-lg font-semibold tracking-tight text-neutral-900">
+              <h2 class="mt-0.5 text-lg font-semibold leading-snug tracking-tight text-neutral-900">
                 {selected.title}
               </h2>
               <div class="mt-1.5 flex items-center gap-2 text-xs text-neutral-500">
@@ -367,20 +367,22 @@
             </div>
           </div>
 
-          {#if !isClosed(selected)}
-            <Button variant="primary" size="md" onclick={() => onStartStage(selected, activeIdx)}>
-              <PhoneCall class="h-3.5 w-3.5" />
-              Join Round {activeIdx + 1}
-            </Button>
-          {:else if selected.status === 'offer'}
-            <Badge variant="success" size="sm" class="font-semibold">
-              {selected.verdict || 'Offer Extended'} · {selected.overallScore}/100
-            </Badge>
-          {:else}
-            <Badge variant="danger" size="sm" class="font-semibold">
-              {selected.verdict || 'Rejected'}
-            </Badge>
-          {/if}
+          <div class="shrink-0">
+            {#if !isClosed(selected)}
+              <Button variant="primary" size="md" onclick={() => onStartStage(selected, activeIdx)} class="whitespace-nowrap">
+                <PhoneCall class="h-3.5 w-3.5" />
+                Join Round {activeIdx + 1}
+              </Button>
+            {:else if selected.status === 'offer'}
+              <Badge variant="success" size="sm" class="whitespace-nowrap font-semibold">
+                {selected.verdict || 'Offer Extended'} · {selected.overallScore}/100
+              </Badge>
+            {:else}
+              <Badge variant="danger" size="sm" class="whitespace-nowrap font-semibold">
+                {selected.verdict || 'Rejected'}
+              </Badge>
+            {/if}
+          </div>
         </div>
 
         <!-- Detail Page Tabs -->
