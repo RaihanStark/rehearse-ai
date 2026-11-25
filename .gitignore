@@ -1,0 +1,10 @@
+backend/.venv/
+backend/__pycache__/
+backend/app/__pycache__/
+backend/app/*/__pycache__/
+backend/rehearse.db
+backend/rehearse.db-*
+frontend/node_modules/
+frontend/dist/
+.DS_Store
+*.pyc

@@ -1,0 +1,15 @@
+[project]
+name = "rehearse-ai-backend"
+version = "0.1.0"
+description = "Interactive multi-stage AI voice mock interviewer backend"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "python-multipart>=0.0.12",
+    "aiosqlite>=0.20.0",
+    "pydantic>=2.9.0",
+    "faster-whisper>=1.1.0",
+    "edge-tts>=7.0.0",
+    "pypdf>=5.0.0",
+]
