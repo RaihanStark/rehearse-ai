@@ -2,9 +2,10 @@
   import { ArrowRight, CheckCircle2, PhoneCall, XCircle } from 'lucide-svelte';
   import type { MockApplication } from '../mockInterviews';
   import type { MockJob } from '../mockJobs';
-  import { Badge, Button, Card } from './ui';
+  import { Badge, Button, Card, Skeleton } from './ui';
 
   interface Props {
+    loading?: boolean;
     applications: MockApplication[];
     jobs: MockJob[];
     onStartStage: (app: MockApplication, stageIndex: number) => void;
@@ -15,6 +16,7 @@
   }
 
   let {
+    loading = false,
     applications,
     jobs,
     onStartStage,
@@ -102,6 +104,51 @@
   <!-- Dashboard Content -->
   <div class="flex-1 overflow-y-auto px-6 py-6">
     <div class="mx-auto max-w-5xl space-y-5">
+      {#if loading}
+        <!-- Boot Skeleton -->
+        <div class="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
+          {#each [0, 1, 2, 3] as _}
+            <Card padding="sm">
+              <Skeleton class="h-3 w-24" />
+              <Skeleton class="mt-3 h-7 w-14" />
+            </Card>
+          {/each}
+        </div>
+
+        <div class="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
+          <div class="space-y-5 lg:col-span-7">
+            <Card padding="md" class="space-y-4">
+              <Skeleton class="h-3 w-32" />
+              {#each [0, 1] as _}
+                <div class="flex items-center justify-between gap-4 pt-2">
+                  <div class="flex items-center gap-3">
+                    <Skeleton class="h-9 w-9 rounded-md" />
+                    <div class="space-y-2">
+                      <Skeleton class="h-3.5 w-44" />
+                      <Skeleton class="h-3 w-64" />
+                    </div>
+                  </div>
+                  <Skeleton class="h-8 w-24 rounded-md" />
+                </div>
+              {/each}
+            </Card>
+          </div>
+          <div class="space-y-5 lg:col-span-5">
+            <Card padding="md" class="space-y-3.5">
+              <Skeleton class="h-3 w-28" />
+              {#each [0, 1, 2] as _}
+                <div class="flex items-center gap-3 pt-1">
+                  <Skeleton class="h-8 w-8 rounded-md" />
+                  <div class="flex-1 space-y-1.5">
+                    <Skeleton class="h-3 w-40" />
+                    <Skeleton class="h-2.5 w-28" />
+                  </div>
+                </div>
+              {/each}
+            </Card>
+          </div>
+        </div>
+      {:else}
       <!-- Top 4 Metrics -->
       <div class="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
         <Card padding="sm">
@@ -324,6 +371,7 @@
           </Card>
         </div>
       </div>
+      {/if}
     </div>
   </div>
 </div>

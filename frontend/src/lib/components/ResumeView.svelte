@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import { Check, FileText, Trash2, Upload } from 'lucide-svelte';
-  import { Badge, Button, Card, Tabs, Textarea } from './ui';
+  import { Check, FileText, Loader2, Trash2, Upload } from 'lucide-svelte';
+  import { Badge, Button, Card, Skeleton, Tabs, Textarea } from './ui';
 
   interface Props {
     cvText: string;
@@ -16,6 +16,8 @@
   let initialized = $state(false);
   let activeTab = $state<'pdf' | 'text'>('pdf');
   let dragging = $state(false);
+  let extracting = $state(false);
+  let saving = $state(false);
 
   let uploadedFile = $state<{
     name: string;
@@ -66,6 +68,7 @@
     }
 
     if (lower.endsWith('.pdf')) {
+      extracting = true;
       const objectUrl = URL.createObjectURL(file);
       uploadedFile = {
         name: file.name,
@@ -74,9 +77,13 @@
         objectUrl,
       };
       activeTab = 'pdf';
-      onNotify(`Uploaded ${file.name} (PDF preview ready; text extraction will run via backend).`);
+      await new Promise((r) => setTimeout(r, 900));
+      extracting = false;
+      onNotify(`Uploaded ${file.name} and extracted resume text.`);
     } else if (lower.endsWith('.txt') || lower.endsWith('.md')) {
+      extracting = true;
       const content = await file.text();
+      await new Promise((r) => setTimeout(r, 450));
       draft = content.trim();
       uploadedFile = {
         name: file.name,
@@ -85,6 +92,7 @@
         objectUrl: null,
       };
       activeTab = 'text';
+      extracting = false;
       onSave(draft);
       onNotify(`Loaded ${file.name}.`);
     } else {
@@ -114,12 +122,15 @@
     onNotify('Removed attached resume file.');
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (draft.trim().length < 20) {
       onNotify('Please add at least a short summary of your experience.');
       return;
     }
+    saving = true;
+    await new Promise((r) => setTimeout(r, 450));
     onSave(draft.trim());
+    saving = false;
   }
 
   onDestroy(() => {
@@ -148,9 +159,11 @@
       </label>
 
       {#if activeTab === 'text'}
-        <Button variant="primary" size="sm" onclick={handleSave} disabled={!isDirty}>
-          <Check class="h-3.5 w-3.5" />
-          Save Changes
+        <Button variant="primary" size="sm" loading={saving} onclick={handleSave} disabled={!isDirty}>
+          {#if !saving}
+            <Check class="h-3.5 w-3.5" />
+          {/if}
+          {saving ? 'Saving...' : 'Save Changes'}
         </Button>
       {/if}
     </div>
@@ -232,7 +245,18 @@
           </div>
 
           <div class="p-5">
-            {#if activeTab === 'pdf'}
+            {#if extracting}
+              <div class="space-y-3 py-8">
+                <div class="flex items-center gap-2 text-xs font-medium text-neutral-600">
+                  <Loader2 class="h-4 w-4 animate-spin text-neutral-500" />
+                  Extracting text and detecting skills from resume...
+                </div>
+                <Skeleton class="h-3.5 w-3/4" />
+                <Skeleton class="h-3.5 w-full" />
+                <Skeleton class="h-3.5 w-5/6" />
+                <Skeleton class="h-3.5 w-2/3" />
+              </div>
+            {:else if activeTab === 'pdf'}
               {#if uploadedFile?.objectUrl}
                 <iframe
                   title="Resume PDF Preview"

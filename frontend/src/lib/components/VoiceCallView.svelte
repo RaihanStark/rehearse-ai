@@ -7,6 +7,7 @@
     CheckCircle2,
     Clock,
     FileText,
+    Loader2,
     Mic,
     MicOff,
     PhoneCall,
@@ -34,6 +35,9 @@
   let stage = $derived(application.stages[stageIndex]);
 
   let phase = $state<'lobby' | 'live'>('lobby');
+  let isConnecting = $state(false);
+  let isEvaluating = $state(false);
+  let isAiThinking = $state(false);
   let selectedMic = $state('Default — Built-in Microphone');
   let elapsedSec = $state(0);
   let muted = $state(false);
@@ -47,7 +51,10 @@
   let timerId: number | null = null;
   let transcript = $state<TranscriptEntry[]>([]);
 
-  function enterLiveCall() {
+  async function enterLiveCall() {
+    isConnecting = true;
+    await new Promise((r) => setTimeout(r, 700));
+    isConnecting = false;
     const s = application.stages[stageIndex];
     transcript = [
       {
@@ -67,7 +74,7 @@
     }, 2600);
   }
 
-  function confirmEndCall() {
+  async function confirmEndCall() {
     if (timerId !== null) {
       clearInterval(timerId);
       timerId = null;
@@ -75,6 +82,9 @@
     finalDurationSec = elapsedSec;
     activeSpeaker = 'none';
     showEndConfirm = false;
+    isEvaluating = true;
+    await new Promise((r) => setTimeout(r, 1500));
+    isEvaluating = false;
     showFinishedModal = true;
   }
 
@@ -95,7 +105,7 @@
   function handleSendMockTurn(e: Event) {
     e.preventDefault();
     const text = draftMessage.trim();
-    if (!text) return;
+    if (!text || isAiThinking) return;
 
     activeSpeaker = 'you';
     transcript = [
@@ -103,8 +113,10 @@
       { time: formatTime(elapsedSec), speaker: 'you', text },
     ];
     draftMessage = '';
+    isAiThinking = true;
 
     setTimeout(() => {
+      isAiThinking = false;
       activeSpeaker = 'interviewer';
       transcript = [
         ...transcript,
@@ -117,7 +129,7 @@
       setTimeout(() => {
         activeSpeaker = 'none';
       }, 2200);
-    }, 900);
+    }, 1100);
   }
 
   onDestroy(() => {
@@ -231,12 +243,20 @@
           </div>
 
           <div class="mt-6 flex items-center gap-2">
-            <Button variant="secondary" size="md" onclick={onCancelLobby}>
+            <Button variant="secondary" size="md" onclick={onCancelLobby} disabled={isConnecting}>
               Cancel
             </Button>
-            <Button variant="primary" size="md" onclick={enterLiveCall} class="flex-1">
-              <PhoneCall class="h-3.5 w-3.5" />
-              Join Call Now
+            <Button
+              variant="primary"
+              size="md"
+              loading={isConnecting}
+              onclick={enterLiveCall}
+              class="flex-1"
+            >
+              {#if !isConnecting}
+                <PhoneCall class="h-3.5 w-3.5" />
+              {/if}
+              {isConnecting ? 'Connecting...' : 'Join Call Now'}
             </Button>
           </div>
         </div>
@@ -348,7 +368,10 @@
           <div class="mt-0.5 text-xs text-neutral-500">{application.company}</div>
 
           <div class="absolute bottom-3.5 left-4 flex items-center gap-1.5 text-[11px] font-medium">
-            {#if activeSpeaker === 'interviewer'}
+            {#if isAiThinking}
+              <Loader2 class="h-3.5 w-3.5 animate-spin text-neutral-500" />
+              <span class="text-neutral-600">Thinking...</span>
+            {:else if activeSpeaker === 'interviewer'}
               <Volume2 class="h-3.5 w-3.5 text-emerald-600" />
               <span class="text-emerald-700">Speaking</span>
             {:else}
@@ -602,6 +625,21 @@
       <Button variant="danger" size="sm" onclick={confirmEndCall}>
         End & Submit Round
       </Button>
+    </div>
+  </Modal>
+
+  <!-- Evaluating Round Modal -->
+  <Modal open={isEvaluating} maxWidth="sm">
+    <div class="py-4 text-center">
+      <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-neutral-100 text-neutral-700">
+        <Loader2 class="h-5 w-5 animate-spin" />
+      </div>
+      <h2 class="mt-3.5 text-sm font-semibold text-neutral-900">
+        Evaluating Round {stageIndex + 1}...
+      </h2>
+      <p class="mt-1.5 text-xs leading-relaxed text-neutral-500">
+        Reviewing your transcript, scoring the rubric, and preparing feedback.
+      </p>
     </div>
   </Modal>
 

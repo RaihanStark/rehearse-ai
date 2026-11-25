@@ -1,12 +1,14 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import type { HTMLButtonAttributes } from 'svelte/elements';
+  import { Loader2 } from 'lucide-svelte';
 
   interface Props extends HTMLButtonAttributes {
     variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'danger-subtle';
     size?: 'xs' | 'sm' | 'md' | 'icon';
     pill?: boolean;
     fullWidth?: boolean;
+    loading?: boolean;
     children: Snippet;
   }
 
@@ -15,6 +17,8 @@
     size = 'md',
     pill = false,
     fullWidth = false,
+    loading = false,
+    disabled = false,
     type = 'button',
     class: className = '',
     children,
@@ -40,10 +44,14 @@
 
 <button
   {type}
+  disabled={disabled || loading}
   class="inline-flex items-center justify-center gap-1.5 border font-medium transition disabled:cursor-not-allowed disabled:opacity-45 {pill
     ? 'rounded-full'
     : 'rounded-md'} {fullWidth ? 'w-full' : ''} {variantClasses[variant]} {sizeClasses[size]} {className}"
   {...rest}
 >
+  {#if loading}
+    <Loader2 class="h-3.5 w-3.5 animate-spin" />
+  {/if}
   {@render children()}
 </button>

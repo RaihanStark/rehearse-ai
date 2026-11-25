@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import {
     Briefcase,
     Building2,
@@ -6,6 +7,7 @@
     FileText,
     Globe,
     LayoutDashboard,
+    Loader2,
     MapPin,
     PhoneCall,
     Plus,
@@ -19,7 +21,7 @@
   import ResumeView from './lib/components/ResumeView.svelte';
   import SettingsView, { type AppSettings } from './lib/components/SettingsView.svelte';
   import VoiceCallView from './lib/components/VoiceCallView.svelte';
-  import { Badge, Button, Input, Modal, Select, Tabs } from './lib/components/ui';
+  import { Badge, Button, Input, Modal, Select, Skeleton, Tabs } from './lib/components/ui';
   import {
     INITIAL_APPLICATIONS,
     type MockApplication,
@@ -59,6 +61,17 @@
   );
   let resumeLastSaved = $state('Today');
   let toast = $state<string | null>(null);
+  let isBootLoading = $state(true);
+  let isGeneratingJobs = $state(false);
+  let generatingCount = $state(0);
+  let applyingJobId = $state<string | null>(null);
+
+  onMount(() => {
+    const id = window.setTimeout(() => {
+      isBootLoading = false;
+    }, 650);
+    return () => clearTimeout(id);
+  });
 
   let filteredJobs = $derived(
     jobs.filter((job) => {
@@ -83,7 +96,7 @@
     applications.filter((a) => a.status === 'ongoing' || a.status === 'ready').length
   );
 
-  function handleApplyToJob(job: MockJob) {
+  async function handleApplyToJob(job: MockJob) {
     const existing = applications.find((a) => a.jobId === job.id);
     if (existing) {
       selectedAppId = existing.id;
@@ -92,6 +105,9 @@
       notify(`Opened your application for ${job.company}.`);
       return;
     }
+
+    applyingJobId = job.id;
+    await new Promise((r) => setTimeout(r, 550));
 
     const created: MockApplication = {
       id: `app-${Date.now()}`,
@@ -116,6 +132,7 @@
 
     applications = [created, ...applications];
     selectedAppId = created.id;
+    applyingJobId = null;
     interviewDetailOpen = true;
     activeNav = 'interviews';
     notify(`Applied to ${job.company} — ready for Round 1.`);
@@ -269,11 +286,19 @@
     { company: 'SignalCraft', initials: 'SC', accent: 'bg-slate-800 text-white', stage: 'Series A · Developer Tools · 55 people', title: 'AI Product Engineer — Evals', location: 'Remote', salary: '$105k – $135k', stretch: ['OpenTelemetry', 'Hybrid Search'] },
   ];
 
-  function handleGenerateJobs(e: Event) {
+  async function handleGenerateJobs(e: Event) {
     e.preventDefault();
     const count = Math.max(1, Math.min(10, Number(genCount) || 1));
     const cats: MockJob['category'][] = ['Backend', 'Fullstack', 'Platform', 'AI Systems'];
     const personas: MockJob['persona'][] = ['Friendly', 'Standard', 'Skeptical Staff'];
+
+    showNewJobModal = false;
+    activeNav = 'jobs';
+    selectedCategory = 'All';
+    isGeneratingJobs = true;
+    generatingCount = count;
+
+    await new Promise((r) => setTimeout(r, 1400));
 
     const batch: MockJob[] = Array.from({ length: count }, (_, idx) => {
       const tpl = GENERATED_POOL[idx % GENERATED_POOL.length];
@@ -348,9 +373,8 @@
 
     jobs = genReplaceFeed ? batch : [...batch, ...jobs];
     selectedJobId = batch[0].id;
-    activeNav = 'jobs';
-    selectedCategory = 'All';
-    showNewJobModal = false;
+    isGeneratingJobs = false;
+    generatingCount = 0;
     notify(`Generated ${count} new job ${count === 1 ? 'listing' : 'listings'} from your CV.`);
   }
 
@@ -500,15 +524,23 @@
       </div>
 
       {#if activeNav === 'jobs'}
-        <Button variant="primary" size="sm" onclick={() => (showNewJobModal = true)}>
-          <Plus class="h-3.5 w-3.5" />
-          New Job Listing
+        <Button
+          variant="primary"
+          size="sm"
+          loading={isGeneratingJobs}
+          onclick={() => (showNewJobModal = true)}
+        >
+          {#if !isGeneratingJobs}
+            <Plus class="h-3.5 w-3.5" />
+          {/if}
+          {isGeneratingJobs ? `Generating ${generatingCount}...` : 'New Job Listing'}
         </Button>
       {/if}
     </header>
 
     {#if activeNav === 'dashboard'}
       <DashboardView
+        loading={isBootLoading}
         {applications}
         {jobs}
         onStartStage={(app, idx) => (activeCall = { appId: app.id, stageIndex: idx })}
@@ -607,7 +639,35 @@
     <div class="flex min-h-0 flex-1 overflow-hidden">
       <!-- Middle Pane: Job Feed -->
       <section class="w-full shrink-0 overflow-y-auto border-r border-neutral-200 bg-white md:w-[370px] lg:w-[400px]">
-        {#if filteredJobs.length === 0}
+        {#if isGeneratingJobs}
+          <div class="border-b border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-medium text-neutral-600">
+            <span class="inline-flex items-center gap-2">
+              <Loader2 class="h-3.5 w-3.5 animate-spin text-neutral-500" />
+              Generating {generatingCount} tailored job {generatingCount === 1 ? 'listing' : 'listings'}...
+            </span>
+          </div>
+          <div class="divide-y divide-neutral-200">
+            {#each Array.from({ length: Math.min(generatingCount, 4) }) as _}
+              <div class="space-y-3 p-4">
+                <div class="flex items-start gap-3">
+                  <Skeleton class="h-9 w-9 shrink-0 rounded-md" />
+                  <div class="flex-1 space-y-1.5">
+                    <Skeleton class="h-3 w-28" />
+                    <Skeleton class="h-4 w-52" />
+                  </div>
+                </div>
+                <Skeleton class="h-3 w-40" />
+                <div class="flex gap-1.5">
+                  <Skeleton class="h-5 w-12" />
+                  <Skeleton class="h-5 w-16" />
+                  <Skeleton class="h-5 w-14" />
+                </div>
+              </div>
+            {/each}
+          </div>
+        {/if}
+
+        {#if !isGeneratingJobs && filteredJobs.length === 0}
           <div class="p-8 text-center">
             <p class="text-xs text-neutral-500">No roles match your current filters.</p>
             <button
@@ -732,9 +792,23 @@
             </div>
 
             <div class="shrink-0">
-              <Button variant="primary" size="md" onclick={() => handleApplyToJob(selectedJob)} class="whitespace-nowrap">
-                <PhoneCall class="h-3.5 w-3.5" />
-                {applications.some((a) => a.jobId === selectedJob.id) ? 'View Application' : 'Apply & Interview'}
+              <Button
+                variant="primary"
+                size="md"
+                loading={applyingJobId === selectedJob.id}
+                onclick={() => handleApplyToJob(selectedJob)}
+                class="whitespace-nowrap"
+              >
+                {#if applyingJobId !== selectedJob.id}
+                  <PhoneCall class="h-3.5 w-3.5" />
+                {/if}
+                {#if applyingJobId === selectedJob.id}
+                  Applying...
+                {:else if applications.some((a) => a.jobId === selectedJob.id)}
+                  View Application
+                {:else}
+                  Apply & Interview
+                {/if}
               </Button>
             </div>
           </div>

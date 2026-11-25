@@ -40,10 +40,14 @@
   });
 
   let isDirty = $derived(JSON.stringify(draft) !== JSON.stringify(settings));
+  let saving = $state(false);
 
-  function handleSave(e: Event) {
+  async function handleSave(e: Event) {
     e.preventDefault();
+    saving = true;
+    await new Promise((r) => setTimeout(r, 450));
     onSave({ ...draft });
+    saving = false;
   }
 </script>
 
@@ -54,9 +58,11 @@
       Local voice, model, and interview pipeline preferences
     </div>
 
-    <Button type="submit" variant="primary" size="sm" disabled={!isDirty}>
-      <Check class="h-3.5 w-3.5" />
-      Save Settings
+    <Button type="submit" variant="primary" size="sm" loading={saving} disabled={!isDirty}>
+      {#if !saving}
+        <Check class="h-3.5 w-3.5" />
+      {/if}
+      {saving ? 'Saving...' : 'Save Settings'}
     </Button>
   </div>
 
